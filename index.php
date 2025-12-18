@@ -14,26 +14,25 @@
 
 	function buildQrPayload(string $type, array $input): ?string {
 		return match ($type) {
-			'text'  => trim($input['text'] ?? ''),
-			
+			'text'  => trim($input['text'] ?? '') ?: null,
 			'url'   => filter_var($input['url'] ?? '', FILTER_VALIDATE_URL) ?: null,
-			
-			'wifi'  => sprintf(
-				'WIFI:T:%s;S:%s;P:%s;;',
-				$input['encryption'] ?? '',
-				$input['ssid'] ?? '',
-				$input['password'] ?? ''
-			),
-			
-			'vcard' => sprintf(
-				"BEGIN:VCARD\nVERSION:3.0\nN:%s;%s\nFN:%s %s\nTEL:%s\nEMAIL:%s\nEND:VCARD",
-				$input['lname'] ?? '',
-				$input['fname'] ?? '',
-				$input['fname'] ?? '',
-				$input['lname'] ?? '',
-				$input['phone'] ?? '',
-				$input['email'] ?? ''
-			),
+			'wifi'  => (!empty($input['ssid']) || !empty($input['password'])) 
+						? sprintf('WIFI:T:%s;S:%s;P:%s;;',
+							$input['encryption'] ?? '',
+							$input['ssid'] ?? '',
+							$input['password'] ?? '')
+						: null,
+			'vcard' => (!empty($input['fname']) || !empty($input['lname']) || !empty($input['phone']) || !empty($input['email']))
+						? sprintf(
+							"BEGIN:VCARD\nVERSION:3.0\nN:%s;%s\nFN:%s %s\nTEL:%s\nEMAIL:%s\nEND:VCARD",
+							$input['lname'] ?? '',
+							$input['fname'] ?? '',
+							$input['fname'] ?? '',
+							$input['lname'] ?? '',
+							$input['phone'] ?? '',
+							$input['email'] ?? ''
+						  )
+						: null,
 			default => null
 		};
 	}
